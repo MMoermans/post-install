@@ -1,68 +1,19 @@
-#!/bin/bash
-
-# Post install script after a debian install
-# Old version > new Ansible playbooks
-
-# Check privileges
-if [[ "${UID}" -ne 0 ]]
-then
- echo 'Must execute with sudo or root' >&2
- exit 1
+#!/usr/bin/env bash
+# Picks the right post-install script for this machine and passes all options on.
+#   sudo ./post-install.sh --dry-run
+set -uo pipefail
+dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+id=""; like=""
+if [[ -r /etc/os-release ]]; then
+  id="$(. /etc/os-release; echo "${ID:-}")"; like="$(. /etc/os-release; echo "${ID_LIKE:-}")"
 fi
-
-# Update and upgrade 
-sudo apt update -y
-sudo apt upgrade -y
-flatpak update -y
-
-# Install AIDE
-apt install aide aide-common -y 
-aideinit
-mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
-
-# Enable UFW firewall
-systemctl is-enabled ufw
-sudo ufw enable 
-
-# Firewall allow openssh
-sudo ufw allow OpenSSH
-
-# Install OpenSSH
-sudo apt install openssh-server -y
-
-# Enable AuditD
-systemctl --now enable auditd 
-
-# Disabling non-key and root login
-echo "PasswordAuthentication no" >> /etc/ssh/sshd_config 
-echo "PermitRootLogin no" >> /etc/ssh/sshd_config 
-echo "PermitEmptyPasswords no" /etc/ssh/sshd_config
-
-# Automatic downloads of security updates
-sudo apt-get install -y unattended-upgrades
-echo "Unattended-Upgrade::Allowed-Origins {
-#   "${distro_id}:${distro_codename}-security";
-#//  "${distro_id}:${distro_codename}-updates";
-#//  "${distro_id}:${distro_codename}-proposed";
-#//  "${distro_id}:${distro_codename}-backports";
-#Unattended-Upgrade::Automatic-Reboot "true"; 
-#}; " >> /etc/apt/apt.conf.d/50unattended-upgrades
-
-# Fail2Ban install 
-sudo apt-get install -y fail2ban
-sudo systemctl start fail2ban
-sudo systemctl enable fail2ban
-
-echo "
-[sshd]
-enabled = true
-port = 22
-filter = sshd
-logpath = /var/log/auth.log
-maxretry = 4
-" >> /etc/fail2ban/jail.local
-
-sudo service ssh restart  
-
-#Install openscap
-sudo apt install libopenscap8 -y
+case "$id" in
+  cachyos) exec bash "$dir/cachyos/post-install.sh" "$@" ;;
+  debian)  exec bash "$dir/debian/post-install.sh" "$@" ;;
+esac
+case " $like " in
+  *" debian "*) echo "'$id' is Debian-based but not Debian. Run debian/post-install.sh --force if you want to try it." >&2 ;;
+  *" arch "*)   echo "'$id' is Arch-based but not CachyOS. Run cachyos/post-install.sh --force if you want to try it." >&2 ;;
+  *)            echo "Unsupported system '${id:-unknown}'. Supported: Debian 12/13 and CachyOS." >&2 ;;
+esac
+exit 1
