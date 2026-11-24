@@ -119,9 +119,9 @@ _need_value() { [[ $# -ge 2 && -n "$2" ]] || die "option $1 needs a value"; }
 
 parse_args() {
   while (( $# )); do
+    # shellcheck disable=SC2034  # FORCE is read by the distro scripts
     case "$1" in
       -n|--dry-run) DRY_RUN=1 ;;
-      # shellcheck disable=SC2034  # FORCE is read by the distro scripts
       --force) FORCE=1 ;;
       --list) LIST=1 ;;
       -h|--help) HELP=1 ;;
