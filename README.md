@@ -1,6 +1,6 @@
 # post-install
 
-Hardening scripts for a fresh install of **Debian 12/13** and **CachyOS**. Each one updates the
+Hardening and start scripts for a fresh install of **Debian 12/13** and **CachyOS**. Each one updates the
 system and then applies the settings that are worth having on any machine, without turning a
 desktop or laptop into something you can't use.
 
