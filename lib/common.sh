@@ -11,6 +11,7 @@ PI_VERSION="2.0.0"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 DRY_RUN=0
+# shellcheck disable=SC2034  # read by the distro scripts
 FORCE=0
 HELP=0
 LIST=0
@@ -21,15 +22,15 @@ ROOT="${PI_ROOT:-}"        # test sandbox: files are written below this director
 SANDBOX=0
 [[ -n "$ROOT" ]] && SANDBOX=1
 LOG_FILE="${PI_LOG:-/var/log/post-install.log}"
-BACKUP_DIR="${ROOT}/var/backups/post-install/$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="${ROOT}/var/backups/post-install/$(date +%Y%m%d-%H%M%S)-$$"
 WROTE=0                    # set by write_file: 1 when the file changed
 STATE_DIR=""
 SELECTED=()
 
 if [[ -t 2 ]]; then
-  C_B=$'\e[1m'; C_R=$'\e[31m'; C_G=$'\e[32m'; C_Y=$'\e[33m'; C_0=$'\e[0m'
+  C_B=$'\e[1m'; C_R=$'\e[31m'; C_Y=$'\e[33m'; C_0=$'\e[0m'
 else
-  C_B=""; C_R=""; C_G=""; C_Y=""; C_0=""
+  C_B=""; C_R=""; C_Y=""; C_0=""
 fi
 
 # --------------------------------------------------------------------------------------------------
@@ -80,7 +81,7 @@ write_file() {
   tmp="$(mktemp)"
   cat >"$tmp"
   WROTE=0
-  if [[ -f "$ROOT$path" ]] && cmp -s "$tmp" "$ROOT$path"; then
+  if [[ -f "$ROOT$path" ]] && [[ "$(sha256sum <"$tmp")" == "$(sha256sum <"$ROOT$path")" ]]; then
     rm -f "$tmp"; info "unchanged: $path"; return 0
   fi
   WROTE=1

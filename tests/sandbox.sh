@@ -80,7 +80,7 @@ GRUB_CMDLINE_LINUX=""
   check "grub: backup is the true original"          grep -rqx 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' "$root/var/backups/post-install"
   cp "$root/etc/default/grub" "$root/grub.after"
   pi --only boot_params,apparmor
-  check "grub: second run does not duplicate"        cmp -s "$root/grub.after" "$root/etc/default/grub"
+  check "grub: second run does not duplicate"        test "$(sha256sum <"$root/grub.after")" = "$(sha256sum <"$root/etc/default/grub")"
   newroot; mkdir -p "$root/etc/default"; : >"$root/etc/default/limine"
   pi --only boot_params
   check "limine: left alone, instructions given"     grep -q 'Limine' "$root/out"
