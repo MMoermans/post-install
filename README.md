@@ -63,7 +63,7 @@ After the modules run, a report shows Secure Boot and disk encryption state, fir
 status, everything listening on the network and failed services. Anything that needs a person is
 repeated under **Still up to you**.
 
-## What a script cannot do for you
+## What this script cannot do for you
 
 - **Disk encryption** has to be chosen at install time. The report tells you if none was found.
 - **Secure Boot, a firmware password and the boot order** are set in the firmware.
