@@ -11,7 +11,6 @@ PI_VERSION="2.0.0"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 DRY_RUN=0
-# shellcheck disable=SC2034  # read by the distro scripts
 FORCE=0
 HELP=0
 LIST=0
@@ -122,6 +121,7 @@ parse_args() {
   while (( $# )); do
     case "$1" in
       -n|--dry-run) DRY_RUN=1 ;;
+      # shellcheck disable=SC2034  # FORCE is read by the distro scripts
       --force) FORCE=1 ;;
       --list) LIST=1 ;;
       -h|--help) HELP=1 ;;
